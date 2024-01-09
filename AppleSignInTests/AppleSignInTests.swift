@@ -60,22 +60,10 @@ class AppleSignInControllerAdapterTests: XCTestCase {
 
 final class AppleSignInTests: XCTestCase {
     func test_authenticate_performsProperRequest() {
-        let nonceProvider = ConstantNonceProvider()
-        let nonce = nonceProvider.generateNonce()
-        
-        let spy = ASAuthorizationController.spy
-        var receivedRequest = [ASAuthorizationAppleIDRequest]()
-        
-        let sut = AppleSignInController(controllerFactory: { requests in
-            receivedRequest += requests
-            return spy
-        }, secureNonceProvider: nonceProvider)
+        let spy = ASAuthorizationController.spy 
+        let sut = AppleSignInController()
+        sut.authenticate(spy)
          
-        sut.authenticate()
-        
-        XCTAssertEqual(receivedRequest.first?.nonce, nonce, "request nonce")
-        XCTAssertEqual(receivedRequest.first?.requestedScopes, [.fullName, .email], "request scopes")
-        XCTAssertEqual(receivedRequest.count, 1, "request count")
         XCTAssertTrue(spy.delegate === sut, "sut is delegate")
         XCTAssertEqual(spy.performRequestsCallCount, 1, "perform request call count")
     }

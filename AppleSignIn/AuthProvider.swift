@@ -36,37 +36,17 @@ class SecureNonceProvider: SecureNonceProviding {
     }
 }
 
-class AppleSignInController: NSObject, AuthController {
-    typealias ControllerFactory = ([ASAuthorizationAppleIDRequest]) -> ASAuthorizationController
-    
-    let controllerFactory: ControllerFactory
+class AppleSignInController: NSObject { 
     private var secureNonceProvider: SecureNonceProviding
     private let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
     
-    init(
-        controllerFactory: @escaping ControllerFactory = ASAuthorizationController.init,
-        secureNonceProvider: SecureNonceProviding = SecureNonceProvider()
-    ) {
-        self.controllerFactory = controllerFactory
+    init(secureNonceProvider: SecureNonceProviding = SecureNonceProvider()) {
         self.secureNonceProvider = secureNonceProvider
     }
     
-    func authenticate(_ authController: ASAuthorizationController) {
-        
-    }
-    
-    func authenticate() {
-        let request = makeRequest()
-        let controller = controllerFactory([request])
+    func authenticate(_ controller: ASAuthorizationController) {
         controller.delegate = self
         controller.performRequests()
-    }
-    
-    func makeRequest() -> ASAuthorizationAppleIDRequest {
-        let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = secureNonceProvider.generateNonce()
-        return request
     }
 }
 
