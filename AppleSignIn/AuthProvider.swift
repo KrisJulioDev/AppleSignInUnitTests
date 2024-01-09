@@ -22,21 +22,7 @@ enum AuthState {
     case success
 }
 
-protocol SecureNonceProviding {
-    var currentNonce: String { get }
-    
-    func generateNonce() -> String
-}
-
-class SecureNonceProvider: SecureNonceProviding {
-    var currentNonce: String { "any raw" }
-    
-    func generateNonce() -> String {
-        return "any encrypted"
-    }
-}
-
-class AppleSignInController: NSObject { 
+class AppleSignInController: NSObject {
     private var secureNonceProvider: SecureNonceProviding
     private let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
     
@@ -44,7 +30,7 @@ class AppleSignInController: NSObject {
         self.secureNonceProvider = secureNonceProvider
     }
     
-    func authenticate(_ controller: ASAuthorizationController) {
+    func authenticate(_ controller: ASAuthorizationController, nonce: String) {
         controller.delegate = self
         controller.performRequests()
     }

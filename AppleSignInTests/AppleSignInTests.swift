@@ -10,34 +10,11 @@ import XCTest
 
 @testable import AppleSignIn
 
-class AppleSignInControllerAdapter: AuthController {
-    let controller: AppleSignInController
-    let nonceProvider: SecureNonceProvider
-    
-    init(controller: AppleSignInController, nonce: SecureNonceProvider) {
-        self.controller = controller
-        self.nonceProvider = nonce
-    }
-    
-     func authenticate() {
-        let request = makeRequest()
-        let authController = ASAuthorizationController(authorizationRequests: [request])
-        controller.authenticate(authController)
-    }
-    
-    func makeRequest() -> ASAuthorizationAppleIDRequest {
-        let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = nonceProvider.generateNonce()
-        return request
-    }
-}
-
-class AppleSignInControllerAdapterTests: XCTestCase {
+final class AppleSignInControllerAdapterTests: XCTestCase {
     func test_authenticate_performsProperRequest() {
         let controller = AppleSignInControllerSpy()
         let nonceProvider = ConstantNonceProvider()
-        let nonce = nonceProvider.generateNonce()
+        let nonce = nonceProvider.generateNonce().sha256
         
         let sut = AppleSignInControllerAdapter(controller: controller, nonce: nonceProvider)
         sut.authenticate()
@@ -50,7 +27,7 @@ class AppleSignInControllerAdapterTests: XCTestCase {
     private class AppleSignInControllerSpy: AppleSignInController {
         var requests = [ASAuthorizationAppleIDRequest]()
         
-        override func authenticate(_ controller: ASAuthorizationController) {
+        override func authenticate(_ controller: ASAuthorizationController, nonce: String) {
             requests += controller.authorizationRequests.compactMap {
                 $0 as? ASAuthorizationAppleIDRequest
             }
@@ -60,9 +37,9 @@ class AppleSignInControllerAdapterTests: XCTestCase {
 
 final class AppleSignInTests: XCTestCase {
     func test_authenticate_performsProperRequest() {
-        let spy = ASAuthorizationController.spy 
+        let spy = ASAuthorizationController.spy
         let sut = AppleSignInController()
-        sut.authenticate(spy)
+        sut.authenticate(spy, nonce: "any")
          
         XCTAssertTrue(spy.delegate === sut, "sut is delegate")
         XCTAssertEqual(spy.performRequestsCallCount, 1, "perform request call count")
@@ -70,10 +47,8 @@ final class AppleSignInTests: XCTestCase {
 }
 
 private class ConstantNonceProvider: SecureNonceProvider {
-    override var currentNonce: String { "any raw" }
-    
-    override func generateNonce() -> String {
-        return "any encrypted"
+    override func generateNonce() -> Nonce {
+        return Nonce(raw: "raw", sha256: "sha256")
     }
 }
 
