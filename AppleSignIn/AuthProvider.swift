@@ -36,7 +36,7 @@ class SecureNonceProvider: SecureNonceProviding {
     }
 }
 
-class AppleSignViewController: NSObject, AuthController {
+class AppleSignInController: NSObject, AuthController {
     typealias ControllerFactory = ([ASAuthorizationAppleIDRequest]) -> ASAuthorizationController
     
     let controllerFactory: ControllerFactory
@@ -49,6 +49,10 @@ class AppleSignViewController: NSObject, AuthController {
     ) {
         self.controllerFactory = controllerFactory
         self.secureNonceProvider = secureNonceProvider
+    }
+    
+    func authenticate(_ authController: ASAuthorizationController) {
+        
     }
     
     func authenticate() {
@@ -66,7 +70,7 @@ class AppleSignViewController: NSObject, AuthController {
     }
 }
 
-extension AppleSignViewController: ASAuthorizationControllerDelegate {
+extension AppleSignInController: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         authSubject.send(completion: .failure(.underlying(error)))
     }

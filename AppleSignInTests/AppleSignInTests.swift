@@ -10,6 +10,54 @@ import XCTest
 
 @testable import AppleSignIn
 
+class AppleSignInControllerAdapter: AuthController {
+    let controller: AppleSignInController
+    let nonceProvider: SecureNonceProvider
+    
+    init(controller: AppleSignInController, nonce: SecureNonceProvider) {
+        self.controller = controller
+        self.nonceProvider = nonce
+    }
+    
+     func authenticate() {
+        let request = makeRequest()
+        let authController = ASAuthorizationController(authorizationRequests: [request])
+        controller.authenticate(authController)
+    }
+    
+    func makeRequest() -> ASAuthorizationAppleIDRequest {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = nonceProvider.generateNonce()
+        return request
+    }
+}
+
+class AppleSignInControllerAdapterTests: XCTestCase {
+    func test_authenticate_performsProperRequest() {
+        let controller = AppleSignInControllerSpy()
+        let nonceProvider = ConstantNonceProvider()
+        let nonce = nonceProvider.generateNonce()
+        
+        let sut = AppleSignInControllerAdapter(controller: controller, nonce: nonceProvider)
+        sut.authenticate()
+        
+        XCTAssertEqual(controller.requests.count, 1, "request nonce")
+        XCTAssertEqual(controller.requests.first?.requestedScopes, [.fullName, .email], "request scopes")
+        XCTAssertEqual(controller.requests.first?.nonce, nonce, "request nonce")
+    }
+    
+    private class AppleSignInControllerSpy: AppleSignInController {
+        var requests = [ASAuthorizationAppleIDRequest]()
+        
+        override func authenticate(_ controller: ASAuthorizationController) {
+            requests += controller.authorizationRequests.compactMap {
+                $0 as? ASAuthorizationAppleIDRequest
+            }
+        }
+    }
+}
+
 final class AppleSignInTests: XCTestCase {
     func test_authenticate_performsProperRequest() {
         let nonceProvider = ConstantNonceProvider()
@@ -18,7 +66,7 @@ final class AppleSignInTests: XCTestCase {
         let spy = ASAuthorizationController.spy
         var receivedRequest = [ASAuthorizationAppleIDRequest]()
         
-        let sut = AppleSignViewController(controllerFactory: { requests in
+        let sut = AppleSignInController(controllerFactory: { requests in
             receivedRequest += requests
             return spy
         }, secureNonceProvider: nonceProvider)
