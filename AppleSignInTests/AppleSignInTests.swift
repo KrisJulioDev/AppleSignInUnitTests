@@ -7,6 +7,7 @@
 
 import AuthenticationServices
 import XCTest
+import Combine
 
 @testable import AppleSignIn
 
@@ -35,7 +36,7 @@ final class AppleSignInControllerAdapterTests: XCTestCase {
     }
 }
 
-final class AppleSignInTests: XCTestCase {
+final class AppleSignInControllerTests: XCTestCase {
     func test_authenticate_performsProperRequest() {
         let spy = ASAuthorizationController.spy
         let sut = AppleSignInController()
@@ -43,6 +44,27 @@ final class AppleSignInTests: XCTestCase {
          
         XCTAssertTrue(spy.delegate === sut, "sut is delegate")
         XCTAssertEqual(spy.performRequestsCallCount, 1, "perform request call count")
+    }
+    
+    func test_didCompleteWithError_emitsFailure() {
+        let sut = AppleSignInController()
+        sut.authorizationController(controller: .spy, didCompleteWithError: NSError(domain: "error", code: 0))
+        
+        var receivedError: Error?
+        var cancellable: AnyCancellable?
+        cancellable = sut.authSubject.sink { completion in
+            switch completion {
+            case let .failure(error):
+                receivedError = error
+            case .finished:
+                XCTFail("Expects receiving error")
+            }
+        } receiveValue: { _ in
+            XCTFail("Expects receiving error")
+        }
+        
+        XCTAssertNotNil(receivedError)
+        cancellable?.cancel()
     }
 }
 

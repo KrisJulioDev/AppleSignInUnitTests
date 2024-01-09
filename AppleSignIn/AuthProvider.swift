@@ -24,7 +24,7 @@ enum AuthState {
 
 class AppleSignInController: NSObject {
     private var secureNonceProvider: SecureNonceProviding
-    private let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
+    public let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
     
     init(secureNonceProvider: SecureNonceProviding = SecureNonceProvider()) {
         self.secureNonceProvider = secureNonceProvider
@@ -37,9 +37,6 @@ class AppleSignInController: NSObject {
 }
 
 extension AppleSignInController: ASAuthorizationControllerDelegate {
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        authSubject.send(completion: .failure(.underlying(error)))
-    }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
@@ -47,5 +44,9 @@ extension AppleSignInController: ASAuthorizationControllerDelegate {
             return
         }
 //        authSubject.send(credential)
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        authSubject.send(completion: .failure(.underlying(error)))
     }
 }
