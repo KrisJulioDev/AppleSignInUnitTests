@@ -10,6 +10,8 @@
 		352F454F2B4D13DB009F3949 /* AppSignInControllerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F454E2B4D13DB009F3949 /* AppSignInControllerAdapter.swift */; };
 		352F45512B4D17EE009F3949 /* SecureNonceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F45502B4D17EE009F3949 /* SecureNonceProvider.swift */; };
 		352F45532B4D1893009F3949 /* SecureNonceProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F45522B4D1893009F3949 /* SecureNonceProviding.swift */; };
+		352F45562B4E6FC1009F3949 /* AuthController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F45552B4E6FC1009F3949 /* AuthController.swift */; };
+		352F45582B4E6FEC009F3949 /* AppleSignInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F45572B4E6FEC009F3949 /* AppleSignInController.swift */; };
 		35C88DEC2B4CB2700035324C /* AppleSignInApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C88DEB2B4CB2700035324C /* AppleSignInApp.swift */; };
 		35C88DEE2B4CB2700035324C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C88DED2B4CB2700035324C /* ContentView.swift */; };
 		35C88DF02B4CB2720035324C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35C88DEF2B4CB2720035324C /* Assets.xcassets */; };
@@ -32,6 +34,8 @@
 		352F454E2B4D13DB009F3949 /* AppSignInControllerAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSignInControllerAdapter.swift; sourceTree = "<group>"; };
 		352F45502B4D17EE009F3949 /* SecureNonceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureNonceProvider.swift; sourceTree = "<group>"; };
 		352F45522B4D1893009F3949 /* SecureNonceProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureNonceProviding.swift; sourceTree = "<group>"; };
+		352F45552B4E6FC1009F3949 /* AuthController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthController.swift; sourceTree = "<group>"; };
+		352F45572B4E6FEC009F3949 /* AppleSignInController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInController.swift; sourceTree = "<group>"; };
 		35C88DE82B4CB2700035324C /* AppleSignIn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppleSignIn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		35C88DEB2B4CB2700035324C /* AppleSignInApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInApp.swift; sourceTree = "<group>"; };
 		35C88DED2B4CB2700035324C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -60,6 +64,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		352F45542B4E6FA0009F3949 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				35C88E152B4CB2D60035324C /* AuthProvider.swift */,
+				352F45552B4E6FC1009F3949 /* AuthController.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
 		35C88DDF2B4CB2700035324C = {
 			isa = PBXGroup;
 			children = (
@@ -83,9 +96,10 @@
 			children = (
 				35C88DEB2B4CB2700035324C /* AppleSignInApp.swift */,
 				35C88DED2B4CB2700035324C /* ContentView.swift */,
-				35C88E152B4CB2D60035324C /* AuthProvider.swift */,
+				352F45542B4E6FA0009F3949 /* Authentication */,
 				352F45502B4D17EE009F3949 /* SecureNonceProvider.swift */,
 				352F45522B4D1893009F3949 /* SecureNonceProviding.swift */,
+				352F45572B4E6FEC009F3949 /* AppleSignInController.swift */,
 				352F454E2B4D13DB009F3949 /* AppSignInControllerAdapter.swift */,
 				35C88DEF2B4CB2720035324C /* Assets.xcassets */,
 				35C88DF12B4CB2720035324C /* Preview Content */,
@@ -213,7 +227,9 @@
 				352F45532B4D1893009F3949 /* SecureNonceProviding.swift in Sources */,
 				35C88DEE2B4CB2700035324C /* ContentView.swift in Sources */,
 				352F45512B4D17EE009F3949 /* SecureNonceProvider.swift in Sources */,
+				352F45582B4E6FEC009F3949 /* AppleSignInController.swift in Sources */,
 				352F454F2B4D13DB009F3949 /* AppSignInControllerAdapter.swift in Sources */,
+				352F45562B4E6FC1009F3949 /* AuthController.swift in Sources */,
 				35C88DEC2B4CB2700035324C /* AppleSignInApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

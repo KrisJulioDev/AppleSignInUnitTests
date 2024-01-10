@@ -8,40 +8,6 @@
 import AuthenticationServices
 import Combine
 
-protocol AuthController {
-    func authenticate()
-}
-
-enum AuthError: Error {
-    case invalidCredentials
-    case underlying(Error)
-}
-
-enum AuthState {
-    case failed(AuthError)
-    case success
-}
-
-class AppleSignInController: NSObject {
-    private var secureNonceProvider: SecureNonceProviding
-    private var currentNonce: String?
-    
-    public let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
-    var authPublisher: AnyPublisher<ASAuthorization, AuthError> {
-        authSubject.eraseToAnyPublisher()
-    }
-    
-    init(secureNonceProvider: SecureNonceProviding = SecureNonceProvider()) {
-        self.secureNonceProvider = secureNonceProvider
-    }
-    
-    func authenticate(_ controller: ASAuthorizationController, nonce: String) {
-        currentNonce = nonce
-        controller.delegate = self
-        controller.performRequests()
-    }
-}
-
 protocol AppleIDCredential {
     var identityToken: Data? { get }
     var user: String { get }

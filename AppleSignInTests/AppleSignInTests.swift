@@ -24,7 +24,7 @@ final class AppleSignInControllerAdapterTests: XCTestCase {
         XCTAssertEqual(controller.requests.first?.requestedScopes, [.fullName, .email], "request scopes")
         XCTAssertEqual(controller.requests.first?.nonce, nonce, "request nonce")
     }
-
+    
     private class AppleSignInControllerSpy: AppleSignInController {
         var requests = [ASAuthorizationAppleIDRequest]()
         
@@ -41,7 +41,7 @@ final class AppleSignInControllerTests: XCTestCase {
         let spy = ASAuthorizationController.spy
         let sut = AppleSignInController()
         sut.authenticate(spy, nonce: "any")
-         
+        
         XCTAssertTrue(spy.delegate === sut, "sut is delegate")
         XCTAssertEqual(spy.performRequestsCallCount, 1, "perform request call count")
     }
@@ -66,7 +66,7 @@ final class AppleSignInControllerTests: XCTestCase {
         
         XCTAssertEqual(spy.events, [.error])
     }
-
+    
     func test_didCompleteWithCredential_withoutNonce_emitsFailure() {
         let sut = AppleSignInController()
         let spy = PublisherSpy(sut.authPublisher)
@@ -77,7 +77,7 @@ final class AppleSignInControllerTests: XCTestCase {
         
         XCTAssertEqual(spy.events, [.error])
     }
-
+    
     func test_didCompleteWithCredential_withValidCredential_emitsSuccess() {
         let sut = AppleSignInController()
         let spy = PublisherSpy(sut.authPublisher)
@@ -89,7 +89,10 @@ final class AppleSignInControllerTests: XCTestCase {
         
         XCTAssertEqual(spy.events, [.finished])
     }
+    
+}
 
+extension AppleSignInControllerTests {
     private struct Credential: AppleIDCredential {
         let identityToken: Data?
         let user: String
@@ -117,14 +120,14 @@ final class AppleSignInControllerTests: XCTestCase {
             } receiveValue: { _ in
                 self.events.append(.value)
             }
-             
+            
         }
     }
-}
-
-private class ConstantNonceProvider: SecureNonceProvider {
-    override func generateNonce() -> Nonce {
-        return Nonce(raw: "raw", sha256: "sha256")
+    
+    private class ConstantNonceProvider: SecureNonceProvider {
+        override func generateNonce() -> Nonce {
+            return Nonce(raw: "raw", sha256: "sha256")
+        }
     }
 }
 
@@ -133,7 +136,7 @@ extension ASAuthorizationController {
         let dummyRequest = ASAuthorizationAppleIDProvider().createRequest()
         return Spy(authorizationRequests: [dummyRequest])
     }
-
+    
     class Spy: ASAuthorizationController {
         
         private(set) var performRequestsCallCount = 0
