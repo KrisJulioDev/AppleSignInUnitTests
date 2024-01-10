@@ -19,6 +19,7 @@ let spy = PublisherSpy(sut.authPublisher)
 WHEN  
 -----
 ```
+sut.authenticate(.spy, nonce: "any nonce")
 sut.didComplete(with: Credential(identityToken: Data("any".utf8),
                                  user: "user",
                                  fullName: PersonNameComponents()))
@@ -27,5 +28,5 @@ sut.didComplete(with: Credential(identityToken: Data("any".utf8),
 THEN  
 -----
 ```
-XCTAssertEqual(spy.events, [.error])
+XCTAssertEqual(spy.events, [.finished])
 ```
