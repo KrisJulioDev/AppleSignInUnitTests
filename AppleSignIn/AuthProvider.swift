@@ -24,26 +24,52 @@ enum AuthState {
 
 class AppleSignInController: NSObject {
     private var secureNonceProvider: SecureNonceProviding
+    private var currentNonce: String?
+    
     public let authSubject = PassthroughSubject<ASAuthorization, AuthError>()
+    var authPublisher: AnyPublisher<ASAuthorization, AuthError> {
+        authSubject.eraseToAnyPublisher()
+    }
     
     init(secureNonceProvider: SecureNonceProviding = SecureNonceProvider()) {
         self.secureNonceProvider = secureNonceProvider
     }
     
     func authenticate(_ controller: ASAuthorizationController, nonce: String) {
+        currentNonce = nonce
         controller.delegate = self
         controller.performRequests()
     }
 }
 
+protocol AppleIDCredential {
+    var identityToken: Data? { get }
+    var user: String { get }
+    var fullName: PersonNameComponents? { get }
+}
+
+extension ASAuthorizationAppleIDCredential: AppleIDCredential {}
+
 extension AppleSignInController: ASAuthorizationControllerDelegate {
-    
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+    func didComplete(with credentials: AppleIDCredential) {
+        guard
+            let appleIDToken = credentials.identityToken,
+            let identityTokenString = String(data: appleIDToken, encoding: .utf8),
+            let nonce = currentNonce
+        else {
             authSubject.send(completion: .failure(.invalidCredentials))
             return
         }
-//        authSubject.send(credential)
+        
+        // do whatever you need for token and nonce
+        // send to firebase for next step registration/login
+        
+        authSubject.send(completion: .finished)
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        let credential = authorization.credential as? AppleIDCredential
+        credential.map(didComplete)
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {

@@ -24,7 +24,7 @@ final class AppleSignInControllerAdapterTests: XCTestCase {
         XCTAssertEqual(controller.requests.first?.requestedScopes, [.fullName, .email], "request scopes")
         XCTAssertEqual(controller.requests.first?.nonce, nonce, "request nonce")
     }
-    
+
     private class AppleSignInControllerSpy: AppleSignInController {
         var requests = [ASAuthorizationAppleIDRequest]()
         
@@ -48,23 +48,77 @@ final class AppleSignInControllerTests: XCTestCase {
     
     func test_didCompleteWithError_emitsFailure() {
         let sut = AppleSignInController()
+        let spy = PublisherSpy(sut.authPublisher)
+        
         sut.authorizationController(controller: .spy, didCompleteWithError: NSError(domain: "error", code: 0))
         
-        var receivedError: Error?
-        var cancellable: AnyCancellable?
-        cancellable = sut.authSubject.sink { completion in
-            switch completion {
-            case let .failure(error):
-                receivedError = error
-            case .finished:
-                XCTFail("Expects receiving error")
-            }
-        } receiveValue: { _ in
-            XCTFail("Expects receiving error")
+        XCTAssertEqual(spy.events, [.error])
+    }
+    
+    func test_didCompleteWithCredential_withInvalidToken_emitsFailure() {
+        let sut = AppleSignInController()
+        let spy = PublisherSpy(sut.authPublisher)
+        
+        sut.authenticate(.spy, nonce: "any nonce")
+        sut.didComplete(with: Credential(identityToken: nil,
+                                         user: "user",
+                                         fullName: PersonNameComponents()))
+        
+        XCTAssertEqual(spy.events, [.error])
+    }
+
+    func test_didCompleteWithCredential_withoutNonce_emitsFailure() {
+        let sut = AppleSignInController()
+        let spy = PublisherSpy(sut.authPublisher)
+        
+        sut.didComplete(with: Credential(identityToken: Data("any".utf8),
+                                         user: "user",
+                                         fullName: PersonNameComponents()))
+        
+        XCTAssertEqual(spy.events, [.error])
+    }
+
+    func test_didCompleteWithCredential_withValidCredential_emitsSuccess() {
+        let sut = AppleSignInController()
+        let spy = PublisherSpy(sut.authPublisher)
+        
+        sut.authenticate(.spy, nonce: "any nonce")
+        sut.didComplete(with: Credential(identityToken: Data("any".utf8),
+                                         user: "user",
+                                         fullName: PersonNameComponents()))
+        
+        XCTAssertEqual(spy.events, [.finished])
+    }
+
+    private struct Credential: AppleIDCredential {
+        let identityToken: Data?
+        let user: String
+        let fullName: PersonNameComponents?
+    }
+    
+    private class PublisherSpy<Success, Failure: Error> {
+        private var cancellable: Cancellable? = nil
+        private(set) var events: [Event] = []
+        
+        enum Event {
+            case value
+            case finished
+            case error
         }
         
-        XCTAssertNotNil(receivedError)
-        cancellable?.cancel()
+        init(_ publisher: AnyPublisher<Success, Failure>) {
+            cancellable = publisher.sink { completion in
+                switch completion {
+                case .failure:
+                    self.events.append(.error)
+                case .finished:
+                    self.events.append(.finished)
+                }
+            } receiveValue: { _ in
+                self.events.append(.value)
+            }
+             
+        }
     }
 }
 
