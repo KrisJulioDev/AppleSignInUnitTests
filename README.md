@@ -4,3 +4,28 @@ Creating unit tests for Apple Sign In can present challenges due to several fact
 
 In this project, I will demonstrate you how to test the framework using the Adapter design pattern and Test Spy to mimic the process flow of Apple Sign in feature.
 
+The process we will follow is the **GIVEN, WHEN, THEN** method.
+
+Example 
+ 
+
+GIVEN  
+-----
+```
+let sut = AppleSignInController()
+let spy = PublisherSpy(sut.authPublisher)
+```
+
+WHEN  
+-----
+```
+sut.didComplete(with: Credential(identityToken: Data("any".utf8),
+                                 user: "user",
+                                 fullName: PersonNameComponents()))
+```
+ 
+THEN  
+-----
+```
+XCTAssertEqual(spy.events, [.error])
+```
