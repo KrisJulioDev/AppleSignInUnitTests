@@ -30,3 +30,4 @@ THEN
 ```
 XCTAssertEqual(spy.events, [.finished])
 ```
+ 
